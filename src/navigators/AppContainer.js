@@ -5,8 +5,7 @@ import SplashScreen from '../screens/auth/SplashScreen';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from '../screens/home/HomeScreen';
 import DetailPage from '../screens/home/DetailScreen';
-import { DrawerNavigator } from '../navigators/DrawerNavigator';
-import LoginScreen from '../screens/auth/Login';
+
 
 const AuthNavigator = createStackNavigator();
 const DashboardNavigator = createStackNavigator();
