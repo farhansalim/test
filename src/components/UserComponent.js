@@ -2,17 +2,17 @@ import React, { Component } from 'react';
 import { Text, View, TouchableOpacity, StyleSheet, Image } from 'react-native';
 
 const UserComponent = (props) => {
-    const { name, img, email, onPress } = props
+    const { title, description, genre, onPress } = props
     return (
         <TouchableOpacity onPress={onPress} style={styles.container}>
             <Text>
-                {name}
+                {title}
             </Text>
-            <Image style={styles.image}
-                source={{ uri: img }}>
-            </Image>
             <Text>
-                {email}
+                {description}
+            </Text>
+            <Text>
+                {genre}
             </Text>
 
 

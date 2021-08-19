@@ -1,12 +1,12 @@
-import { LIST_USER_SUCCESS,LIST_USER_FAILURE } from './../../actions/ActionTypes'
+import { GET_FILMS_LIST_SUCCESS, GET_FILMS_LIST_FAILURE } from './../../actions/ActionTypes'
 
 export default (state = {}, action) => {
     switch (action.type) {
-        case LIST_USER_SUCCESS:
+        case GET_FILMS_LIST_SUCCESS:
             return Object.assign({}, state, {
                 list: action.payload
             });
-        case LIST_USER_FAILURE:
+        case GET_FILMS_LIST_FAILURE:
             return Object.assign({}, state, {
                 error: action.payload
             })

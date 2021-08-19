@@ -14,6 +14,11 @@ import * as HomeActions from './../../store/actions/HomeActions/HomeActions';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import UserComponent from '../../components/UserComponent';
+import LocalData from './../../config/LocalStorage'
+import { Dropdown, } from 'react-native-element-dropdown';
+import PrimaryButton from '../../components/common/PrimaryButton';
+import * as authActions from '../../store/actions/AuthActions/AuthActions';
+import {CommonActions} from '@react-navigation/native';
 
 class HomeScreen extends Component {
     constructor(props) {
@@ -21,97 +26,123 @@ class HomeScreen extends Component {
         this.state = {
             loading: true,
             data: [],
-            filteredData: []
+            filteredData: [],
+            genreData: [
+                { label: 'Thriller', value: '1' },
+                { label: 'children', value: '2' },
+                { label: 'Suspense', value: '3' },
+                { label: 'Drama', value: '4' },
+            ],
+            selectedData: null,
+
         };
     }
     componentDidMount = async () => {
         this.fetchData()
     }
 
-    fetchData = () => {
+    fetchData = async () => {
         const { actions } = this.props;
-        actions.home.getUsersList()
+        let userData = await LocalData.getData()
+        actions.home.getFilmsList(userData)
             .then(res => {
-                this.setState({ data: res, loading: false })
+                this.setState({ loading: false })
             })
             .catch(err => {
                 console.log(err, "inscren")
             })
     }
 
-    searchUser = (searchText) => {
-        const { list } = this.props
-        this.setState({ searchText: searchText });
-        let filteredData = list.filter(function (item) {
-            const itemData = item.name ? item.name.toUpperCase() : ''.toUpperCase();
-            const textData = searchText.toUpperCase();
-            return itemData.indexOf(textData) > -1;
-        });
-        this.setState({ filteredData: filteredData });
+    _renderItem = item => {
+        return (
+            <View style={styles.item}>
+                <Text style={styles.textItem}>{item.label}</Text>
+            </View>
+        );
     };
-    onPressUser = (item) => {
-        console.log(item, "item")
-        const { navigation } = this.props
-        navigation.navigate('DetailPage', {
-            user: item
-        })
+    setValue = async (val) => {
+        const { actions } = this.props;
+        let userData = await LocalData.getData()
+        actions.home.getFilmsListByGenre(val, userData)
+
+    }
+    handleLogOut = async () => {
+        const { actions, navigation } = this.props;
+        await actions.auth.signOut()
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 1,
+                routes: [{ name: 'Auth' }],
+            }),
+        );
     }
 
 
     render() {
         const { list } = this.props
-        const { loading } = this.state;
+        const { loading, genreData, selectedData } = this.state;
         return (
-            <SafeAreaView style={styles.container}>
-                {/* <ScrollView> */}
-                {
-                    loading ?
-                        (
-                            <View style={{ paddingTop: 50 }}>
-                                <ActivityIndicator size="small" color="#0000ff" />
-                            </View>
-                        )
-                        :
-                        (
-                            <View style={styles.subContainer}>
-                                <View style={{ padding: 10 }}>
-                                    {
-                                        list &&
-                                        (
-                                            <>
-                                                <View style={styles.textInputContainer}>
-                                                    <TextInput style={styles.inputContainer}
-                                                        placeholderTextColor="#4f4d4d"
-                                                        placeholder="  Search User"
-                                                        onChangeText={(val) => {
-                                                            this.searchUser(val);
-                                                        }}>
-                                                    </TextInput>
-                                                </View>
+            <View style={styles.container}>
+                <ScrollView style={styles.container}>
+                    {
+                        loading ?
+                            (
+                                <View style={{ paddingTop: 50 }}>
+                                    <ActivityIndicator size="small" color="#0000ff" />
+                                </View>
+                            )
+                            :
+                            (
+                                <View style={styles.subContainer}>
+                                    <View style={{ padding: 10 }}>
+                                        <Dropdown
+                                            style={styles.dropdown}
+                                            containerStyle={styles.shadow}
+                                            data={genreData}
+                                            search
+                                            searchPlaceholder="Search"
+                                            labelField="label"
+                                            valueField="value"
+                                            label="Dropdown"
+                                            placeholder="Select item"
+                                            value={selectedData}
+                                            onChange={item => {
+                                                this.setValue(item.value)
+                                            }}
+                                            renderItem={item => this._renderItem(item)}
+                                            textError="Error"
+                                        />
+                                        {
+                                            list &&
+                                            (
                                                 <FlatList
-                                                    data={this.state.filteredData && this.state.filteredData.length > 0 ?
-                                                        this.state.filteredData : this.state.data}
+                                                    data={list}
                                                     renderItem={({ item }) =>
                                                         <UserComponent
-                                                            onPress={() => this.onPressUser(item)}
-                                                            name={item.name}
-                                                            img={item.profile_image}
-                                                            email={item.email}
+                                                            // onPress={() => this.onPressUser(item)}
+                                                            title={item.title}
+                                                            genre={item.genre}
+                                                            description={item.description}
                                                         />}
                                                     keyExtractor={item => item.id}
                                                     showsHorizontalScrollIndicator={false}
                                                     showsVerticalScrollIndicator={false}
                                                 />
-                                            </>
-                                        )
-                                    }
+                                            )
+                                        }
+                                        <PrimaryButton
+                                            title="LogOut"
+                                            style={styles.butonContainer}
+                                            color={['#2B3FD9', '#E344D7']}
+                                            txtStyle={styles.buttonText}
+                                            onPress={() => this.handleLogOut()}
+                                        />
+                                    </View>
                                 </View>
-                            </View>
-
-                        )
-                }
-                {/* </ScrollView> */}
-            </SafeAreaView>
+                            )
+                    }
+                </ScrollView>
+            </View>
         );
     }
 }
@@ -123,6 +154,7 @@ const mapDispatchToProps = dispatch => {
     return {
         actions: {
             home: bindActionCreators(HomeActions, dispatch),
+            auth: bindActionCreators(authActions, dispatch),
         },
     };
 };
@@ -139,17 +171,13 @@ const styles = StyleSheet.create({
     },
     subContainer: {
         flex: 1,
-        paddingBottom: 50
-        // justifyContent: 'center',
-        // alignItems: 'center',
-        // backgroundColor: colors.primaryColor,
     },
     titleStyle: {
-        // color: colors.whiteTextColor,
+
         fontSize: 20,
     },
     subTitleStyle: {
-        // color: colors.whiteTextColor,
+
         fontSize: 14,
     },
     textcontainer: {
@@ -159,13 +187,28 @@ const styles = StyleSheet.create({
         height: 50,
         backgroundColor: "#ebebeb",
         borderRadius: 6,
-        marginVertical: 15,
-        borderColor: "grey"
-
+        justifyContent: "center",
+        borderColor: "grey",
+        marginTop: 10
     },
     inputContainer: {
         height: "100%",
         width: "100%",
-
-    }
+    },
+    dropdown: {
+        backgroundColor: 'white',
+        borderBottomColor: 'gray',
+        borderBottomWidth: 0.5,
+        marginTop: 20,
+    },
+    butonContainer: {
+        justifyContent: 'center',
+        height: 53,
+        borderRadius: 15,
+    },
+    buttonText: {
+        color: '#FFFFFF',
+        fontSize: 15,
+        alignSelf: 'center',
+    },
 });
