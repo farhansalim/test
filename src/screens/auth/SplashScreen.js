@@ -1,27 +1,19 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {
   StyleSheet,
   View,
-  TouchableOpacity,
   SafeAreaView,
-  Image,
   Text,
-  ScrollView,
 } from 'react-native';
 
-
-const SplashScreen = ( props) => {
+const SplashScreen = (props) => {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.container}>
-          <View style={styles.subContainer}>
-              <Text style={styles.titleStyle}>
-                  SplashScreen
-              </Text>
-
-          </View>
-       
-      </ScrollView>
+      <View style={styles.subContainer}>
+        <Text style={styles.titleStyle}>
+          SplashScreen
+        </Text>
+      </View>
     </SafeAreaView>
   )
 }
@@ -37,15 +29,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    // backgroundColor: colors.primaryColor,
   },
   titleStyle: {
-    // color: colors.whiteTextColor,
     fontSize: 20,
     marginBottom: 20
   },
   subTitleStyle: {
-    // color: colors.whiteTextColor,
     fontSize: 14,
   },
   textcontainer: {
